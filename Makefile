@@ -11,6 +11,9 @@ src := ping.c \
 	utils.c \
 	error.c \
 	ft_getopt.c \
+	send.c \
+	receive.c \
+	echo.c \
 
 objs_dir = obj
 

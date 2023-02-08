@@ -6,6 +6,12 @@ void	dtotimeval(double n, struct timeval *time)
 	double integral;
 
 	fractional = modf(n, &integral);
-	time->tv_sec = (time_t)integral;
-	time->tv_usec = (suseconds_t)(fractional * TO_MICROSECONDS);
+	time->tv_sec = integral;
+	time->tv_usec = fractional * TO_MICROSECONDS;
+}
+
+//returns in milliseconds
+double	timevaltod(struct timeval *time)
+{
+	return time->tv_sec * 1000 + time->tv_usec / 1000; 
 }

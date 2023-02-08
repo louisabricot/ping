@@ -30,6 +30,7 @@
 # define TIMEOUT_OPTION		'W'
 # define VERBOSE_OPTION		'v'
 # define INTERVAL_OPTION	'i'
+# define INTERVAL_THRESHOLD	0.2
 # define HELP_OPTION		'h'
 
 # define INTERVAL_MIN		0
@@ -60,7 +61,7 @@
 	{"-n", "no dns name resolution"}, \
 	{"-v", "verbose output"}, \
 	{"-w <deadline>", "reply wait <deadline> in second"}, \
-	{"-W <timeout", "time to wait for response"} \
+	{"-W <timeout>", "time to wait for response"} \
 }
 
 /*
@@ -74,7 +75,8 @@
 # define ROOT				0
 # define HOST_LEN			1024 //TODO: change
 # define ECHO_DATA_LEN		56
-
+# define DEFAULT_LINUX_TTL	64
+# define IPHDR_IHL			5
 /*
  * GLOBAL VARIABLES FOR FT_GETOPT
  */
@@ -88,10 +90,10 @@ typedef struct			s_opt
 {
 	unsigned long		count;
 	int					numeric;
-	double				interval; //in seconds
+	struct timeval		interval; //in seconds
 	bool				verbose;
-	double				timeout;
-	unsigned long		deadline;
+	struct timeval		timeout;
+	struct timeval		deadline;
 
 }						s_opt;
 
@@ -103,6 +105,7 @@ typedef struct			s_info
 	unsigned long		seq_n;
 	double				tmin;
 	double				tmax;
+	double				tsum;
 }						s_info;
 
 typedef struct			s_host
@@ -124,6 +127,7 @@ typedef struct			s_session
 {
 	int					fd;
 	struct timeval		start;
+	struct timeval		deadline;
 	s_echo				echo;
 	s_host				host;
 	s_info				info;
@@ -134,6 +138,10 @@ void	dtotimeval(double n, struct timeval *time);
 void	error_exit(char *msg);
 void	init_session(int ac, char **av, s_session *session);
 void	init_socket(s_session *session);
-int		ft_getopt(int ac, char **av, const char *optstring);
+int	ft_getopt(int ac, char **av, const char *optstring);
 void	usage(void);
+int			receive_packet(s_session *session);
+void		send_packet(s_session *session);
+double	timevaltod(struct timeval *time);
+void	setup_echo(s_session *session);
 #endif

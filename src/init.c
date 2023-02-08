@@ -3,7 +3,6 @@
 void		init_socket(s_session *session)
 {
 	int				on;
-	struct timeval	timeout;
 
 	//check permission
 	if (getuid() != ROOT)
@@ -22,8 +21,7 @@ void		init_socket(s_session *session)
 		error_exit("setsockopt");
 
 	//Add a time out to recvmsg()
-	dtotimeval(session->opt.timeout, &timeout);
-	if (setsockopt(session->fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) != SUCCESS)
+	if (setsockopt(session->fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&session->opt.timeout, sizeof(struct timeval)) != SUCCESS)
 		error_exit("setsockopt");
 }
 
@@ -32,7 +30,8 @@ static void		set_default_values(s_session *session)
 	bzero(session, sizeof(s_session));
 
 	session->opt.numeric = NI_NAMEREQD;
-	session->opt.interval = 1;
+	session->opt.interval.tv_sec = 1;
+	//session->opt.interval.tv_usec = 0;
 	session->opt.verbose = false;
 	session->host.name = NULL;
 	//session->opt.timeout = 0;
@@ -103,6 +102,9 @@ void				resolve_host(s_host *host)
 
 static void			parse_options(int ac, char **av, s_session *session)
 {
+	unsigned long	deadline;
+	double			timeout;
+	double			interval;
 	int				opt;
 
 	while ((opt = ft_getopt(ac, av, OPTIONS)) != -1)
@@ -116,18 +118,19 @@ static void			parse_options(int ac, char **av, s_session *session)
 				session->opt.numeric = NI_NUMERICHOST;
 				break ;
 			case DEADLINE_OPTION:
-				session->opt.deadline = parseul(ft_optarg, DEADLINE_MIN, DEADLINE_MAX);
+				deadline = parseul(ft_optarg, DEADLINE_MIN, DEADLINE_MAX);
+				dtotimeval(deadline, &session->opt.deadline);
 				break ;
 			case TIMEOUT_OPTION:
-				session->opt.timeout = parsed(ft_optarg, TIMEOUT_MIN, TIMEOUT_MAX);
+				timeout = parsed(ft_optarg, TIMEOUT_MIN, TIMEOUT_MAX);
+				dtotimeval(timeout, &session->opt.timeout);
 				break ;
 			case VERBOSE_OPTION:
 				session->opt.verbose = true;
 				break ;
 			case INTERVAL_OPTION:
-				session->opt.interval = parsed(ft_optarg, INTERVAL_MIN, INTERVAL_MAX);
-				//if (session->opt.interval < 0.2 && getuid() != ROOT)
-					//error_exit();
+				interval = parsed(ft_optarg, INTERVAL_MIN, INTERVAL_MAX);
+				dtotimeval(interval, &session->opt.interval);
 				break ;
 			case '?':
 				if (!session->host.name)
@@ -144,5 +147,5 @@ void			init_session(int ac, char **av, s_session *session)
 	set_default_values(session);
 	parse_options(ac, av, session);
 	resolve_host(&session->host);
-	//setup_echo(session);
+	setup_echo(session);
 }
