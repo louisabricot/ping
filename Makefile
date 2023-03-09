@@ -7,13 +7,11 @@ CC := gcc
 CFLAGS := -Wall -Wextra -Werror -I ${inc_dir}
 VPATH = src
 src := ping.c \
-	init.c \
+	setup.c \
 	utils.c \
-	error.c \
 	ft_getopt.c \
 	send.c \
 	receive.c \
-	echo.c \
 
 objs_dir = obj
 

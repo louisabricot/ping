@@ -23,16 +23,17 @@
  * PING OPTIONS
  */
 
-# define OPTIONS			"c:nw:W:vi:vh"
+# define OPTIONS			"c:nw:W:vi:vht:"
 # define COUNT_OPTION		'c'
 # define NUMERIC_OPTION		'n'
 # define DEADLINE_OPTION	'w'
 # define TIMEOUT_OPTION		'W'
+# define TTL_OPTION			't'
 # define VERBOSE_OPTION		'v'
 # define INTERVAL_OPTION	'i'
-# define INTERVAL_THRESHOLD	0.2
 # define HELP_OPTION		'h'
 
+# define INTERVAL_THRESHOLD	0.2
 # define INTERVAL_MIN		0
 # define INTERVAL_MAX		INT32_MAX
 
@@ -45,6 +46,9 @@
 # define TIMEOUT_MIN		0
 # define TIMEOUT_MAX		INT32_MAX
 
+# define TTL_MIN			1
+# define TTL_MAX			MAXTTL
+
 /*
  * ERROR MANAGEMENT
  */
@@ -52,13 +56,13 @@
 # define NB_OPTIONS			8
 # define OPT_INDEX			0
 # define DEF_INDEX			1
-# define USAGE_MESSAGE		"\nUsage\nft_ping [options] <destination>\n\nOptions:\n"
+# define USAGE_MESSAGE		"Usage: ft_ping [OPTION...] HOST ...\nSend ICMP ECHO_REQUEST packets to network hosts.\n\nYou must be root to start pinging.\n\nOptions implemented:\n"
 # define PING_OPTIONS	{ \
-	{"<destination>", "dns name of ip address"}, \
-	{"-c <count>", "stop after <count> replies"}, \
+	{"-c <count>", "stop after sending <count> replies"}, \
 	{"-h", "print help and exit"}, \
-	{"-i <interval>", "seconds between sending each packet"}, \
-	{"-n", "no dns name resolution"}, \
+	{"-i <interval>", "wait <interval> seconds between sending each packet"}, \
+	{"-n", "do not resolve host addresses"}, \
+	{"-t <ttl>", "specify <ttl> as time to live"}, \
 	{"-v", "verbose output"}, \
 	{"-w <deadline>", "reply wait <deadline> in second"}, \
 	{"-W <timeout>", "time to wait for response"} \
@@ -72,11 +76,10 @@
 # define ERROR				-1
 # define TO_MICROSECONDS	1e+6 
 # define DEC_BASE			10
-# define ROOT				0
-# define HOST_LEN			1024 //TODO: change
+# define ROOT_UID			0
 # define ECHO_DATA_LEN		56
-# define DEFAULT_LINUX_TTL	64
 # define IPHDR_IHL			5
+
 /*
  * GLOBAL VARIABLES FOR FT_GETOPT
  */
@@ -93,6 +96,7 @@ typedef struct			s_opt
 	struct timeval		interval; //in seconds
 	bool				verbose;
 	struct timeval		timeout;
+	unsigned int		ttl;
 	struct timeval		deadline;
 
 }						s_opt;
@@ -103,6 +107,7 @@ typedef struct			s_info
 	unsigned long		nrecv;
 	unsigned long		nloss;
 	unsigned long		seq_n;
+	unsigned long		err;
 	double				tmin;
 	double				tmax;
 	double				tsum;
@@ -112,7 +117,7 @@ typedef struct			s_host
 {
 	char				*name;
 	char				ip[INET_ADDRSTRLEN];
-	char				reverse[HOST_LEN];
+	char				reverse[NI_MAXHOST];
 	struct sockaddr_in	addr;
 }						s_host;
 
@@ -134,14 +139,24 @@ typedef struct			s_session
 	s_opt				opt;
 }						s_session;
 
-void	dtotimeval(double n, struct timeval *time);
-void	error_exit(char *msg);
-void	init_session(int ac, char **av, s_session *session);
-void	init_socket(s_session *session);
-int	ft_getopt(int ac, char **av, const char *optstring);
-void	usage(void);
-int			receive_packet(s_session *session);
-void		send_packet(s_session *session);
-double	timevaltod(struct timeval *time);
-void	setup_echo(s_session *session);
+// setup.c
+void					setup_session(int ac, char **av, s_session *session);
+
+// receive.c
+int						receive_packet(s_session *session);
+
+// getopt.c
+int						ft_getopt(int ac, char **av, const char *optstring);
+
+// send.c
+void					send_packet(s_session *session);
+
+// utils.c
+void					error_exit(char *msg);
+double					timevaltod(struct timeval *time);
+void					usage(void);
+unsigned long			parseul(char *arg, uint64_t min, uint64_t max);
+double					parsed(char *arg, uint64_t min, uint64_t max);
+void					dtotimeval(double time_in_sec, struct timeval *time);
+
 #endif

@@ -1,4 +1,4 @@
-#include "../inc/ft_ping.h"
+#include "../inc/ft_getopt.h"
 # define INVALID_OPTION "invalid option"
 # define REQUIRES_ARG "option requires an argument"
 
