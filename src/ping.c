@@ -55,7 +55,7 @@ static void				check_deadline(void)
 
 	gettimeofday(&now, NULL);
 	timeradd(&now, &g_session.opt.interval, &next);
-	if (timercmp(&next, &g_session.deadline, >))
+	if (timercmp(&now, &g_session.deadline, >=))
 		end_session(SUCCESS);
 }
 
@@ -63,52 +63,42 @@ static void				ping_target(int sig)
 {
 	(void)sig;
 	
-	send_packet(&g_session);
-	receive_packet(&g_session);
-
 	if (!timerisset(&g_session.opt.deadline)) {
 
 		//If count option is set, the program stops when we SENT <count> packets
 		if (g_session.info.nsent == g_session.opt.count)
 			end_session(SUCCESS);
-
 	} else {
-		
 		check_deadline();
 		
 		//If both count and deadline options are set, the program stops when we RECEIVED <count> packets
 		if (g_session.info.nrecv == g_session.opt.count)
 			end_session(SUCCESS);
 	}
-	
-	set_interval_timer();
+	send_packet(&g_session);
+	if (timerisset(&g_session.opt.interval))
+		set_interval_timer();
 }
 
 int		main(int ac, char **av)
 {
-	s_session	*session;
-
+	setup_session(ac, av, &g_session);
 	
-	if (ac == 1 || getuid() != ROOT_UID)
-		usage();
+	signal(SIGINT, &end_session);
+	signal(SIGQUIT, &status);
+	signal(SIGALRM, &ping_target);
 
-	session = &g_session;
-	setup_session(ac, av, session);
+	printf("FT_PING %s (%s) %lu(%lu) bytes of data.\n", g_session.host.name, g_session.host.ip, sizeof(g_session.echo.data), sizeof(g_session.echo));
+
+	gettimeofday(&g_session.start, NULL);
 	
-	signal(SIGINT, end_session);
-	signal(SIGQUIT, status);
-	signal(SIGALRM, ping_target);
-
-	dprintf(STDOUT_FILENO, "FT_PING %s (%s) %lu(%lu) bytes of data.\n", session->host.name, session->host.ip, sizeof(session->echo.data), sizeof(session->echo));
-
-	gettimeofday(&session->start, NULL);
-	
-	if (timerisset(&session->opt.deadline))
-		timeradd(&session->start, &session->opt.deadline, &session->deadline);
+	if (timerisset(&g_session.opt.deadline))
+		timeradd(&g_session.start, &g_session.opt.deadline, &g_session.deadline);
 	
 	ping_target(SUCCESS);
-	
 	while (true)
-		;
+	{
+		receive_packet(&g_session);
+	}
 	return (SUCCESS);
 }

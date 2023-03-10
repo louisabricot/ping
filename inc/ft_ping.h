@@ -33,8 +33,7 @@
 # define INTERVAL_OPTION	'i'
 # define HELP_OPTION		'h'
 
-# define INTERVAL_THRESHOLD	0.2
-# define INTERVAL_MIN		0
+# define INTERVAL_MIN		0.0
 # define INTERVAL_MAX		INT32_MAX
 
 # define DEADLINE_MIN		0
@@ -93,7 +92,7 @@ typedef struct			s_opt
 {
 	unsigned long		count;
 	int					numeric;
-	struct timeval		interval; //in seconds
+	struct timeval		interval;
 	bool				verbose;
 	struct timeval		timeout;
 	unsigned int		ttl;
@@ -143,7 +142,7 @@ typedef struct			s_session
 void					setup_session(int ac, char **av, s_session *session);
 
 // receive.c
-int						receive_packet(s_session *session);
+void					receive_packet(s_session *session);
 
 // getopt.c
 int						ft_getopt(int ac, char **av, const char *optstring);
@@ -155,8 +154,8 @@ void					send_packet(s_session *session);
 void					error_exit(char *msg);
 double					timevaltod(struct timeval *time);
 void					usage(void);
-unsigned long			parseul(char *arg, uint64_t min, uint64_t max);
-double					parsed(char *arg, uint64_t min, uint64_t max);
+unsigned long			parseul(char *arg, unsigned long min, unsigned long max);
+double					parsed(char *arg, double min, double max);
 void					dtotimeval(double time_in_sec, struct timeval *time);
 
 #endif

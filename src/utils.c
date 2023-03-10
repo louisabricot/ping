@@ -10,7 +10,7 @@ void	error_exit(char *msg)
  * Parse arg string into double and check number is within min and max range
  */
 
-double				parsed(char *arg, uint64_t min, uint64_t max)
+double				parsed(char *arg, double min, double max)
 {
 	double			n;
 	char			*endptr;
@@ -27,7 +27,7 @@ double				parsed(char *arg, uint64_t min, uint64_t max)
 	//Check range
 	if (n < min || n > max)
 	{
-		dprintf(STDERR_FILENO, "ft_ping: invalid argument: '%f': out of range: %ld <= value <= %ld\n", n, min, max);
+		dprintf(STDERR_FILENO, "ft_ping: invalid argument: '%f': out of range: %f <= value <= %f\n", n, min, max);
 		exit(ERROR);
 	}
 	return (n);
@@ -37,7 +37,7 @@ double				parsed(char *arg, uint64_t min, uint64_t max)
  * Parse arg string into unsigned long and check number is within min max range
  */
 
-unsigned long			parseul(char *arg, uint64_t min, uint64_t max)
+unsigned long			parseul(char *arg, unsigned long min, unsigned long max)
 {
 	unsigned long		n;
 	char				*endptr;

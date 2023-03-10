@@ -1,15 +1,10 @@
 #include "../inc/ft_ping.h"
 
-/*
- * Creates a RAW socket and set socket options
- * IP_HDRINCL is set to prevent the kernel from adding IP header
- * SO_RCVTIMEO is set with timeout value to enable timeout option
- */
-
 static void			setup_socket(s_session *session)
 {
 	int				on;
 
+	//Check uid
 	//Create raw socket
 	session->fd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (session->fd == ERROR)
@@ -29,35 +24,23 @@ static void			setup_socket(s_session *session)
 	}
 }
 
-/*
- * Converts the hostname into an Ipv4 and socket address
- */
-
 void					resolve_host(s_host *host)
 {
 	struct addrinfo		hints;
 	struct addrinfo		*res;
 
 	bzero(&hints, sizeof(struct addrinfo));
-
-	//Resolve hostname
 	hints.ai_family = AF_INET;
+
+	//Translate host name into socket address
 	if (getaddrinfo(host->name, NULL, &hints, &res) != SUCCESS)
 		error_exit("getaddrinfo");
-	
-	//Store IPv4 address
 	host->addr = *(struct sockaddr_in *)res->ai_addr;
 
-	//Convert IPv4 address into text
+	//Translate socket address into IP
 	inet_ntop(AF_INET, &(host->addr.sin_addr), host->ip, INET_ADDRSTRLEN);
 	freeaddrinfo(res);
 }
-
-/*
- * Parses the program's arguments and set the session struct accordingly
- * If more than one hostname are passed, only the first hostname is taken into account
- * If an unknown option is parsed, the program prints usage and exit
- */
 
 static void				parse_options(int ac, char **av, s_session *session)
 {
@@ -89,6 +72,8 @@ static void				parse_options(int ac, char **av, s_session *session)
 				break ;
 			case INTERVAL_OPTION:
 				interval = parsed(ft_optarg, INTERVAL_MIN, INTERVAL_MAX);
+				if (interval == 0.0)
+					printf("Je suis nulle\n");
 				dtotimeval(interval, &session->opt.interval);
 				break ;
 			case TTL_OPTION:
@@ -104,38 +89,45 @@ static void				parse_options(int ac, char **av, s_session *session)
 	}
 }
 
-static void			setup_packet(s_session *session)
+static void			set_iphdr(struct iphdr *iphdr, s_session *session)
 {
-	//Fill IP header
-	session->echo.iphdr.version = IPVERSION;
-	session->echo.iphdr.ihl = IPHDR_IHL;
-	session->echo.iphdr.tot_len = sizeof(s_echo);
-	session->echo.iphdr.ttl = session->opt.ttl;
-	session->echo.iphdr.protocol = IPPROTO_ICMP;
-	session->echo.iphdr.check = 0; //filled by kernel
-	session->echo.iphdr.saddr = INADDR_ANY;
-	session->echo.iphdr.daddr = session->host.addr.sin_addr.s_addr;
-
-	//Fill ICMP header
-	session->echo.icmphdr.type = ICMP_ECHO;
-	session->echo.icmphdr.code = 0;
+	iphdr->version = IPVERSION;
+	iphdr->ihl = IPHDR_IHL;
+	iphdr->tot_len = sizeof(s_echo);
+	iphdr->ttl = session->opt.ttl;
+	iphdr->protocol = IPPROTO_ICMP;
+	iphdr->check = 0; //filled by kernel
+	iphdr->saddr = INADDR_ANY;
+	iphdr->daddr = session->host.addr.sin_addr.s_addr;
 }
-
 /*
- * Fill the session struct with parsed values and set the ping packet accordingly
- */
-
-void				setup_session(int ac, char **av, s_session *session)
+static void			set_icmphdr(struct icmphdr *icmphdr)
+{
+	icmphdr->type = ICMP_ECHO;
+	icmphdr->code = 0;
+}
+*/
+static void			set_session(s_session *session)
 {
 	bzero(session, sizeof(s_session));
-	
+
 	//Setup default values
+	session->opt.count = INT64_MAX;
 	session->opt.numeric = NI_NAMEREQD;
 	session->opt.interval.tv_sec = 1;
 	session->host.name = NULL;
 	session->opt.ttl = IPDEFTTL;
-	
+
+}
+
+void				setup_session(int ac, char **av, s_session *session)
+{
+	set_session(session);
 	parse_options(ac, av, session);
+
+	//If interval is set at 0.0, signal alarm is never triggered, bypass by setting an interval every 1 microsecond
+	if (session->opt.interval.tv_sec == 0 && session->opt.interval.tv_usec == 0)
+		session->opt.interval.tv_usec = 1;
 	
 	//Check there is a host
 	if (!session->host.name)
@@ -144,7 +136,6 @@ void				setup_session(int ac, char **av, s_session *session)
 	resolve_host(&session->host);
 
 	setup_socket(session);
+	set_iphdr(&session->echo.iphdr, session);
 
-	//Setup ping packet
-	setup_packet(session);
 }
