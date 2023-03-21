@@ -34,7 +34,7 @@ void					resolve_host(s_host *host)
 
 	//Translate host name into socket address
 	if (getaddrinfo(host->name, NULL, &hints, &res) != SUCCESS)
-		error_exit("getaddrinfo");
+		error_exit("getaddrinfo: invalid host");
 	host->addr = *(struct sockaddr_in *)res->ai_addr;
 
 	//Translate socket address into IP
@@ -72,8 +72,6 @@ static void				parse_options(int ac, char **av, s_session *session)
 				break ;
 			case INTERVAL_OPTION:
 				interval = parsed(ft_optarg, INTERVAL_MIN, INTERVAL_MAX);
-				if (interval == 0.0)
-					printf("Je suis nulle\n");
 				dtotimeval(interval, &session->opt.interval);
 				break ;
 			case TTL_OPTION:
@@ -100,20 +98,14 @@ static void			set_iphdr(struct iphdr *iphdr, s_session *session)
 	iphdr->saddr = INADDR_ANY;
 	iphdr->daddr = session->host.addr.sin_addr.s_addr;
 }
-/*
-static void			set_icmphdr(struct icmphdr *icmphdr)
-{
-	icmphdr->type = ICMP_ECHO;
-	icmphdr->code = 0;
-}
-*/
+
 static void			set_session(s_session *session)
 {
 	bzero(session, sizeof(s_session));
 
 	//Setup default values
 	session->opt.count = INT64_MAX;
-	session->opt.numeric = NI_NAMEREQD;
+	session->opt.numeric = NI_NUMERICHOST;
 	session->opt.interval.tv_sec = 1;
 	session->host.name = NULL;
 	session->opt.ttl = IPDEFTTL;

@@ -23,12 +23,12 @@
  * PING OPTIONS
  */
 
-# define OPTIONS			"c:nw:W:vi:vht:"
+# define OPTIONS		"c:nw:W:vi:vht:"
 # define COUNT_OPTION		'c'
 # define NUMERIC_OPTION		'n'
 # define DEADLINE_OPTION	'w'
 # define TIMEOUT_OPTION		'W'
-# define TTL_OPTION			't'
+# define TTL_OPTION		't'
 # define VERBOSE_OPTION		'v'
 # define INTERVAL_OPTION	'i'
 # define HELP_OPTION		'h'

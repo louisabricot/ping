@@ -2,7 +2,7 @@
 
 void	error_exit(char *msg)
 {
-	dprintf(STDERR_FILENO, "ft_ping: %s: %s\n", msg, strerror(errno));
+	dprintf(STDERR_FILENO, "ft_ping: %s\n", msg);
 	exit(ERROR);
 }
 
