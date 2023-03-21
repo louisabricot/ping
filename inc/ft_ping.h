@@ -75,7 +75,7 @@
 # define ERROR				-1
 # define TO_MICROSECONDS	1e+6 
 # define DEC_BASE			10
-# define ROOT_UID			0
+# define ROOT				0
 # define ECHO_DATA_LEN		56
 # define IPHDR_IHL			5
 

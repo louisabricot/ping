@@ -44,8 +44,6 @@ void		send_packet(s_session *session)
 	set_echo_data(session->echo.data);
 	set_icmphdr(&session->echo.icmphdr, session);
 
-	if (sendto(session->fd, &session->echo, sizeof(s_echo), 0, (const struct sockaddr *)&session->host.addr, sizeof(struct sockaddr)) == ERROR)
-		dprintf(STDERR_FILENO, "ft_ping: error sendto\n");
-	else
+	if (sendto(session->fd, &session->echo, sizeof(s_echo), 0, (const struct sockaddr *)&session->host.addr, sizeof(struct sockaddr)) != ERROR)
 		session->info.nsent++;
 }
