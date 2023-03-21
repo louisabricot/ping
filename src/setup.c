@@ -5,6 +5,9 @@ static void			setup_socket(s_session *session)
 	int				on;
 
 	//Check uid
+	if (getuid() != ROOT)
+		error_exit("You must be root\n");
+
 	//Create raw socket
 	session->fd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (session->fd == ERROR)
