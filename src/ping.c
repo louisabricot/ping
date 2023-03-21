@@ -43,7 +43,7 @@ static void				set_interval_timer(void)
 {
 	struct itimerval	interval;
 
-	bzero(&interval, sizeof(struct itimerval));
+	ft_bzero(&interval, sizeof(struct itimerval));
 	interval.it_value = g_session.opt.interval;
 	setitimer(ITIMER_REAL, &interval, NULL);
 }

@@ -157,5 +157,6 @@ void					usage(void);
 unsigned long			parseul(char *arg, unsigned long min, unsigned long max);
 double					parsed(char *arg, double min, double max);
 void					dtotimeval(double time_in_sec, struct timeval *time);
-
+void					*ft_bzero(void *b, size_t len);
+void					*ft_memcpy(void *dst, const void *src, size_t n);
 #endif

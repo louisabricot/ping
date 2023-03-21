@@ -35,8 +35,8 @@ static void			set_echo_data(unsigned char *data)
 	struct timeval	now;
 	
 	gettimeofday(&now, NULL);
-	bzero(data, sizeof(ECHO_DATA_LEN));
-	memcpy(data, &now, sizeof(struct timeval));
+	ft_bzero(data, sizeof(ECHO_DATA_LEN));
+	ft_memcpy(data, &now, sizeof(struct timeval));
 }
 
 void		send_packet(s_session *session)

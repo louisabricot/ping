@@ -20,7 +20,7 @@ static int			check_timestamp(struct timeval *unchecked, s_session *session)
 {
 	struct timeval	original;
 
-	memcpy(&original, session->echo.data, sizeof(struct timeval));
+	ft_memcpy(&original, session->echo.data, sizeof(struct timeval));
 	if (timercmp(unchecked, &original, !=))
 		return (ERROR);
 	return (SUCCESS);
@@ -38,7 +38,7 @@ static int			parse_packet(s_session *session, s_echo *reply)
 	gettimeofday(&now, NULL);
 	
 	//Reverse lookup source addr
-	bzero(&host, sizeof(struct s_host));
+	ft_bzero(&host, sizeof(struct s_host));
 	reverse_lookup(&host, reply, session->opt.numeric);
 
 	if (reply->icmphdr.type == ICMP_ECHOREPLY)
@@ -47,7 +47,7 @@ static int			parse_packet(s_session *session, s_echo *reply)
 			return (ERROR);
 		
 		//Check the received timestamp is the same as the one sent
-		memcpy(&unchecked, reply->data, sizeof(struct timeval));
+		ft_memcpy(&unchecked, reply->data, sizeof(struct timeval));
 		if (check_timestamp(&unchecked, session) == ERROR)
 			return (ERROR);
 		
@@ -75,7 +75,7 @@ static int			parse_packet(s_session *session, s_echo *reply)
 void	setup_msghdr(struct msghdr *msg, struct iovec *iov, s_host *host)
 {
 
-	bzero(msg, sizeof(struct msghdr));
+	ft_bzero(msg, sizeof(struct msghdr));
 	msg->msg_name = &host->addr;
 	msg->msg_namelen = sizeof(struct sockaddr_in);
 	msg->msg_iov = iov;
@@ -88,7 +88,7 @@ void	receive_packet(s_session *session)
 	struct iovec	iov;
 	s_echo			packet;
 
-	bzero(&packet, sizeof(s_echo));
+	ft_bzero(&packet, sizeof(s_echo));
 	iov.iov_base = &packet;
 	iov.iov_len = sizeof(s_echo);
 	setup_msghdr(&response, &iov, &session->host);

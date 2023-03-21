@@ -90,3 +90,37 @@ void					usage(void)
 	exit(SUCCESS);
 }
 
+void	*ft_bzero(void *b, size_t len)
+{
+	unsigned char	data;
+	unsigned char	*s;
+	size_t			i;
+
+	data = (unsigned char)0;
+	s = (unsigned char *)b;
+	i = 0;
+	while (i < len)
+	{
+		s[i] = data;
+		i++;
+	}
+	return (s);
+}
+void	*ft_memcpy(void *dst, const void *src, size_t n)
+{
+	size_t			i;
+	unsigned char	*s1;
+	unsigned char	*s2;
+
+	i = 0;
+	s1 = (unsigned char *)dst;
+	s2 = (unsigned char *)src;
+	if (!src && !dst)
+		return (NULL);
+	while (i < n)
+	{
+		s1[i] = s2[i];
+		i++;
+	}
+	return (s1);
+}
