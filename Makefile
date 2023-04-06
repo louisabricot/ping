@@ -18,7 +18,9 @@ objs_dir = obj
 objs := $(addprefix ${objs_dir}/, ${src:.c=.o})
 
 .PHONY: all
-all: ${objs_dir} ${objs}
+all: ${objs_dir} ${bin}
+
+${bin}: ${objs}
 	${CC} ${CFLAGS} ${objs} -o ${bin}
 	@printf "\033[0;32mExecutable created!\033[m\n"
 
