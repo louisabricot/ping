@@ -18,6 +18,7 @@
 # include <errno.h>
 # include <unistd.h>
 # include <arpa/inet.h>
+# include "ft_getopt.h"
 
 /* 
  * PING OPTIONS
@@ -78,15 +79,6 @@
 # define ROOT				0
 # define ECHO_DATA_LEN		56
 # define IPHDR_IHL			5
-
-/*
- * GLOBAL VARIABLES FOR FT_GETOPT
- */
-
-extern int	ft_optind;
-extern char	*ft_optarg;
-extern int	ft_opterr;
-extern int	ft_optopt;
 
 typedef struct			s_opt
 {
